@@ -14,10 +14,16 @@ class PromptBuilder:
             else "No job description was provided."
         )
 
+        recipient_name = (
+            campaign.contact_name.strip()
+            if campaign.contact_name
+            else "Hiring Manager"
+        )
+
         return f"""
 You are an AI assistant that writes professional cold outreach emails.
 
-STRICT RULES:
+STRICT FACTUAL RULES:
 
 - Use ONLY the information provided below.
 - Never invent projects.
@@ -29,16 +35,36 @@ STRICT RULES:
 - Never invent hiring requirements.
 - Never invent candidate experience.
 - Never invent company goals or products.
-- Do not praise or describe the company unless that information appears in the provided Job Description.
-- If the campaign mode is WITHOUT_JD, never mention a job posting, vacancy, opening, or hiring requirement.
-- If the campaign mode is WITH_JD, only reference information explicitly present in the Job Description.
-- Never claim the candidate developed or trained AI models unless the Master Profile explicitly states that.
+- Never imply that a role, opening, or vacancy exists unless it is explicitly stated in the supplied Job Description.
+- Do not praise or describe the company unless that information appears in the supplied Job Description.
+- Never claim the candidate developed, trained, deployed, or fine-tuned AI models unless the Master Profile explicitly states that.
+- Never claim that the candidate's background aligns with the recipient's needs unless those needs appear explicitly in the supplied Job Description.
 - Prefer factual wording such as "I am reaching out to explore relevant opportunities."
-- Keep the email between 90 and 160 words.
-- End politely.
+
+CONTENT RULES:
+
+- The email body must contain between 110 and 135 words.
+- Never write fewer than 110 words.
+- Never write more than 135 words.
+- Use the candidate's real name.
+- Address the recipient using the supplied recipient name.
+- If the recipient name is unavailable, use "Hello".
+- Mention only two or three concrete skills or named projects.
+- Mention availability only if it appears in the Master Profile.
+- End with a polite request for a short conversation.
+- Include a professional sign-off using the candidate's real name.
 - Do not use placeholders.
-- Do not use vague claims such as "innovative solutions", "expertise", "confident in my ability", or "align with your team's needs" unless directly supported by the Master Profile.
-- Prefer concrete references to listed skills and named projects.
+- Do not use bullet points in the email body.
+- Do not use markdown.
+- Do not include the subject line inside the email body.
+- Do not write anything outside the required tags.
+- Do not use unsupported phrases such as:
+  "innovative solutions",
+  "confident in my ability",
+  "align with your team's needs",
+  "contribute to your success",
+  "strong fit",
+  or similar claims unless directly supported by the supplied data.
 
 ==============================
 MASTER PROFILE
@@ -76,10 +102,10 @@ CAMPAIGN
 Company:
 {campaign.company_name}
 
-Recruiter:
-{campaign.contact_name}
+Recipient Name:
+{recipient_name}
 
-Recruiter Title:
+Recipient Title:
 {campaign.contact_title}
 
 Target Role:
@@ -96,21 +122,58 @@ Job Description:
 TASK
 ==============================
 
-Write a factual, concise cold outreach email grounded only in the supplied Master Profile and Campaign data.
+Write one factual and concise cold outreach email grounded only in the supplied Master Profile and Campaign data.
+
+The body should include:
+
+- A brief introduction using the candidate's real name.
+- A factual reason for reaching out.
+- Two or three concrete skills or named projects from the Master Profile.
+- The candidate's availability when relevant.
+- A polite request for a short conversation.
+- A professional sign-off using the candidate's real name.
 
 For WITHOUT_JD mode:
+
 - State that the candidate is exploring relevant opportunities.
-- Do not mention a job posting, vacancy, or hiring requirement.
+- Do not mention a job posting, vacancy, opening, role requirement, or hiring requirement.
+- Do not say "this role".
 - Do not infer what the company is working on.
+- Do not claim that the candidate's background matches the company's needs.
+- Do not describe company initiatives or products.
 
 For WITH_JD mode:
-- Refer only to skills or requirements explicitly present in the supplied Job Description.
 
-Output exactly in this format:
+- Refer only to skills, requirements, responsibilities, or technologies explicitly present in the supplied Job Description.
+- Do not add requirements that are absent from the Job Description.
 
-Subject:
-<subject>
+Before returning the answer:
 
-Body:
-<body only>
-"""
+- Silently count the words inside the BODY tags.
+- Revise the body if it contains fewer than 110 words.
+- Revise the body if it contains more than 135 words.
+- Do not count the subject or tags as body words.
+- Check that no placeholder remains.
+- Check that no unsupported company or hiring claim was added.
+
+OUTPUT FORMAT RULES:
+
+- The opening subject tag must literally be <SUBJECT>.
+- Do not replace SUBJECT with the company name.
+- The closing subject tag must literally be </SUBJECT>.
+- The opening body tag must literally be <BODY>.
+- The closing body tag must literally be </BODY>.
+- Do not add word-count notes.
+- Do not add any other tags.
+- Do not add explanations, headings, markdown, or code fences.
+
+Return exactly this structure:
+
+<SUBJECT>
+Write one concise subject line here
+</SUBJECT>
+
+<BODY>
+Write the complete email body here
+</BODY>
+""".strip()

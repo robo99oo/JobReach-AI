@@ -61,6 +61,7 @@ class Campaign(Base):
         Enum(CampaignStatus),
         nullable=False,
         default=CampaignStatus.PENDING_GEN,
+        index=True,
     )
 
     job_description: Mapped[str | None] = mapped_column(
@@ -83,6 +84,12 @@ class Campaign(Base):
         nullable=True,
     )
 
+    gmail_draft_id: Mapped[str | None] = mapped_column(
+        String(255),
+        nullable=True,
+        index=True,
+    )
+
     gmail_thread_id: Mapped[str | None] = mapped_column(
         String(255),
         nullable=True,
@@ -92,6 +99,7 @@ class Campaign(Base):
     gmail_message_id: Mapped[str | None] = mapped_column(
         String(255),
         nullable=True,
+        index=True,
     )
 
     stop_reason: Mapped[str | None] = mapped_column(

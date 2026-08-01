@@ -3,16 +3,31 @@ from contextlib import asynccontextmanager
 from fastapi import FastAPI
 
 import app.models
+from app.api.routes.analytics import router as analytics_router
 from app.api.routes.campaigns import router as campaigns_router
+from app.api.routes.follow_ups import router as follow_ups_router
 from app.api.routes.master_profile import router as master_profile_router
+from app.api.routes.scheduler import router as scheduler_router
 from app.core.config import settings
-from app.db.database import Base, engine
+from app.workers.background_scheduler import (
+    start_background_scheduler,
+    stop_background_scheduler,
+)
 
 
 @asynccontextmanager
 async def lifespan(app: FastAPI):
-    Base.metadata.create_all(bind=engine)
-    yield
+    """
+    Start the background scheduler with FastAPI and stop it cleanly
+    during application shutdown.
+    """
+
+    start_background_scheduler()
+
+    try:
+        yield
+    finally:
+        stop_background_scheduler()
 
 
 app = FastAPI(
@@ -24,6 +39,9 @@ app = FastAPI(
 
 app.include_router(master_profile_router)
 app.include_router(campaigns_router)
+app.include_router(follow_ups_router)
+app.include_router(scheduler_router)
+app.include_router(analytics_router)
 
 
 @app.get("/")

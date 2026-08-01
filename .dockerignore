@@ -1,0 +1,13 @@
+.venv
+__pycache__
+*.pyc
+*.pyo
+*.pyd
+.git
+.gitignore
+.env
+jobreach.db
+data/google/token.json
+data/google/credentials.json
+.vscode
+.idea

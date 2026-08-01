@@ -40,3 +40,7 @@ build/
 # Coverage
 .coverage
 htmlcov/
+
+credentials.json
+token.json
+data/google/

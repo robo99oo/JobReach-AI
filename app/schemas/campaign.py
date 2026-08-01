@@ -16,7 +16,10 @@ class CampaignCreate(BaseModel):
 
     @model_validator(mode="after")
     def validate_mode_requirements(self):
-        if self.mode == CampaignMode.WITH_JD and not self.job_description:
+        if (
+            self.mode == CampaignMode.WITH_JD
+            and not self.job_description
+        ):
             raise ValueError(
                 "job_description is required when mode is WITH_JD"
             )
@@ -29,14 +32,23 @@ class CampaignResponse(BaseModel):
     contact_name: str | None
     contact_title: str | None
     recipient_email: str
+
     mode: CampaignMode
     status: CampaignStatus
+
     job_description: str | None
     target_role: str | None
+
     email_subject: str | None
     email_body: str | None
+
+    # Gmail fields
+    gmail_draft_id: str | None
     gmail_thread_id: str | None
+    gmail_message_id: str | None
+
     stop_reason: str | None
+
     created_at: datetime
     updated_at: datetime
     sent_at: datetime | None
@@ -48,8 +60,14 @@ class CampaignResponse(BaseModel):
 class CampaignGenerationResponse(BaseModel):
     id: int
     status: CampaignStatus
+
     email_subject: str | None
     email_body: str | None
+
+    gmail_draft_id: str | None = None
+    gmail_thread_id: str | None = None
+    gmail_message_id: str | None = None
+
     stop_reason: str | None
 
     model_config = ConfigDict(from_attributes=True)
